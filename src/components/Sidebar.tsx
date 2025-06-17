@@ -10,36 +10,22 @@ import {
   TestTube,
   ChevronLeft,
   ChevronRight,
-  LayoutDashboard // Adicionado para a nova página
+  LayoutDashboard
 } from 'lucide-react';
 import type { SidebarItem } from '@/types/navigation';
 import { Button } from '@/components/ui/button';
+import { useSidebarStore } from '@/store/sidebarStore'; // 1. Importar a store
 
 const sidebarItems: SidebarItem[] = [
-  {
-    href: '/',
-    icon: Home,
-    label: 'Início'
-  },
-  {
-    href: '/dashboard', // Nova página
-    icon: LayoutDashboard,
-    label: 'Dashboard'
-  },
-  {
-    href: '/map',
-    icon: Map,
-    label: 'Mapa'
-  },
-  {
-    href: '/test',
-    icon: TestTube,
-    label: 'Teste'
-  }
+  { href: '/', icon: Home, label: 'Início' },
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/map', icon: Map, label: 'Mapa' },
+  { href: '/test', icon: TestTube, label: 'Teste' }
 ];
 
 export default function Sidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // 2. Substituir o useState pela store do Zustand
+  const { isCollapsed, toggleSidebar } = useSidebarStore();
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
 
@@ -47,20 +33,15 @@ export default function Sidebar() {
     const checkMobile = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (mobile && !isCollapsed) {
-        setIsCollapsed(true);
-      }
     };
 
     checkMobile();
     window.addEventListener('resize', checkMobile);
     
     return () => window.removeEventListener('resize', checkMobile);
-  }, [isCollapsed]);
+  }, []);
 
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+  // 3. A função toggleSidebar já vem da store, então não precisa ser definida aqui.
 
   return (
     <div className={`
@@ -76,7 +57,7 @@ export default function Sidebar() {
         )}
         {!isMobile && (
           <Button
-            onClick={toggleSidebar}
+            onClick={toggleSidebar} // 4. O onClick agora chama a função da store
             variant="ghost"
             size="icon"
             className="rounded-lg"
