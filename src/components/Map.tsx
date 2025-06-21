@@ -1,84 +1,53 @@
 // src/components/Map.tsx
 'use client';
 
-import { useEffect, useRef } from 'react';
-import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import 'leaflet-defaulticon-compatibility';
 
-// Fix para ícones do Leaflet no Next.js
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
+import { useEffect, type ReactNode } from 'react';
+import { MapContainer, TileLayer, useMap, Polyline } from 'react-leaflet';
+import type { LatLngBoundsExpression, LatLngExpression } from 'leaflet';
+import CustomMarker from './map/CustomMarker';
+import type { DisplayMarker } from '@/types/map';
 
-interface MapProps {
-  center?: [number, number];
-  zoom?: number;
-  height?: string;
-  className?: string;
-  markers?: Array<{
-    position: [number, number];
-    popup?: string;
-    title?: string;
-  }>;
-}
-
-export default function Map({ 
-  center = [-23.5505, -46.6333], // São Paulo como padrão
-  zoom = 13,
-  height = '400px',
-  className = '',
-  markers = []
-}: MapProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
+// Componente que reage a mudanças e atualiza a visão do mapa
+function MapViewUpdater({ center, zoom, bounds }: { center: LatLngExpression, zoom: number, bounds?: LatLngBoundsExpression }) {
+  const map = useMap();
 
   useEffect(() => {
-    if (!mapRef.current) return;
-
-    // Verificar se o mapa já foi inicializado
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
+    if (bounds) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    } else {
+      map.setView(center, zoom);
     }
+  }, [center, zoom, bounds, map]);
 
-    // Criar nova instância do mapa
-    const map = L.map(mapRef.current).setView(center, zoom);
+  return null;
+}
 
-    // Adicionar tile layer (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+export interface MapProps {
+  center: LatLngExpression;
+  zoom: number;
+  displayMarkers?: DisplayMarker[];
+  polyline?: [number, number][];
+  bounds?: LatLngBoundsExpression;
+}
 
-    // Adicionar marcadores
-    markers.forEach(marker => {
-      const leafletMarker = L.marker(marker.position).addTo(map);
-      
-      if (marker.popup) {
-        leafletMarker.bindPopup(marker.popup);
-      }
-      
-      if (marker.title) {
-        leafletMarker.bindTooltip(marker.title);
-      }
-    });
-
-    mapInstanceRef.current = map;
-
-    // Cleanup function
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
-  }, [center, zoom, markers]);
-
+export default function Map({ center, zoom, bounds, displayMarkers = [], polyline }: MapProps) {
   return (
-    <div 
-      ref={mapRef} 
-      style={{ height }} 
-      className={`w-full rounded-lg border border-gray-200 dark:border-gray-700 ${className}`}
-    />
+    <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} className="h-full w-full">
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
+
+      <MapViewUpdater center={center} zoom={zoom} bounds={bounds} />
+
+      {displayMarkers.map(marker => (
+        <CustomMarker key={marker.id} data={marker} />
+      ))}
+
+      {/* Efeito de "casing" para a rota (linha mais grossa por baixo) */}
+      {polyline && <Polyline pathOptions={{ color: '#A8D8FF', weight: 9, opacity: 0.8 }} positions={polyline} />}
+      {polyline && <Polyline pathOptions={{ color: '#0052D4', weight: 5, opacity: 1 }} positions={polyline} />}
+    </MapContainer>
   );
 }

@@ -1,43 +1,47 @@
 // src/app/map/page.tsx
 'use client';
 
-import { useState } from 'react';
-import Map from '@/components/Map';
+import dynamic from 'next/dynamic';
+import MapSidebar from '@/components/TrackableItemsSidebar';
+import { trackableItems } from '@/data/trackable-items';
+import { exampleRoute } from '@/data/googleRouteExample';
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMap } from '@/hooks/useMap';
+
+const Map = dynamic(() => import('@/components/Map'), {
+    loading: () => <Skeleton className="h-full w-full" />,
+    ssr: false
+});
 
 export default function MapPage() {
-  // Coordenadas de exemplo (pontos interessantes do Rio de Janeiro)
-  const [markers] = useState([
-    {
-      position: [-22.9068, -43.1729] as [number, number],
-      popup: '<b>Cristo Redentor</b><br>Uma das 7 maravilhas do mundo moderno',
-      title: 'Cristo Redentor'
-    },
-    {
-      position: [-22.9711, -43.1822] as [number, number],
-      popup: '<b>Pão de Açúcar</b><br>Cartão postal do Rio de Janeiro',
-      title: 'Pão de Açúcar'
-    },
-    {
-      position: [-22.9732, -43.1896] as [number, number],
-      popup: '<b>Praia de Copacabana</b><br>A princesinha do mar',
-      title: 'Copacabana'
-    },
-    {
-      position: [-22.9838, -43.2096] as [number, number],
-      popup: '<b>Praia de Ipanema</b><br>Garota de Ipanema',
-      title: 'Ipanema'
-    }
-  ]);
+  const {
+    displayMarkers,
+    activePolyline,
+    mapCenter,
+    mapZoom,
+    selectedItemId,
+    bounds,
+    selectItem,
+    selectRoute
+  } = useMap();
 
   return (
-    <div className="h-screen">
-      {/* Mapa ocupando toda a área disponível (descontando a sidebar) */}
-      <Map
-        center={[-22.9068, -43.1729]} // Cristo Redentor como centro
-        zoom={12}
-        height="100vh"
-        markers={markers}
-        className="w-full"
+    <div className="flex h-screen">
+      <div className="flex-1 h-full">
+        <Map
+          center={mapCenter}
+          zoom={mapZoom}
+          bounds={bounds}
+          displayMarkers={displayMarkers}
+          polyline={activePolyline}
+        />
+      </div>
+      <MapSidebar
+        items={trackableItems}
+        routes={[exampleRoute]} // Passamos a rota como um array
+        selectedItemId={selectedItemId}
+        onItemSelect={selectItem}
+        onRouteSelect={selectRoute}
       />
     </div>
   );

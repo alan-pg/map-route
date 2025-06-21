@@ -10,21 +10,27 @@ import {
   TestTube,
   ChevronLeft,
   ChevronRight,
-  LayoutDashboard
+  LayoutDashboard,
+  Route // 1. Importe o novo ícone
 } from 'lucide-react';
 import type { SidebarItem } from '@/types/navigation';
 import { Button } from '@/components/ui/button';
-import { useSidebarStore } from '@/store/sidebarStore'; // 1. Importar a store
+import { useSidebarStore } from '@/store/sidebarStore';
 
 const sidebarItems: SidebarItem[] = [
   { href: '/', icon: Home, label: 'Início' },
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  // 2. Adicione o novo item da página de rotas aqui
+  {
+    href: '/routes',
+    icon: Route,
+    label: 'Gestão de Rotas'
+  },
   { href: '/map', icon: Map, label: 'Mapa' },
   { href: '/test', icon: TestTube, label: 'Teste' }
 ];
 
 export default function Sidebar() {
-  // 2. Substituir o useState pela store do Zustand
   const { isCollapsed, toggleSidebar } = useSidebarStore();
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
@@ -41,8 +47,6 @@ export default function Sidebar() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // 3. A função toggleSidebar já vem da store, então não precisa ser definida aqui.
-
   return (
     <div className={`
       fixed left-0 top-0 h-full bg-background border-r
@@ -57,7 +61,7 @@ export default function Sidebar() {
         )}
         {!isMobile && (
           <Button
-            onClick={toggleSidebar} // 4. O onClick agora chama a função da store
+            onClick={toggleSidebar}
             variant="ghost"
             size="icon"
             className="rounded-lg"
