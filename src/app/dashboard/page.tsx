@@ -23,8 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { NewRouteForm } from "@/components/NewRouteForm"; // Supondo que você criou o arquivo acima
+
 
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
@@ -101,20 +100,6 @@ export default function DashboardPage() {
                 Visualização das últimas rotas adicionadas.
               </CardDescription>
             </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>Adicionar Rota</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Nova Rota</DialogTitle>
-                  <DialogDescription>
-                    Preencha as informações para criar uma nova rota.
-                  </DialogDescription>
-                </DialogHeader>
-                <NewRouteForm />
-              </DialogContent>
-            </Dialog>
           </CardHeader>
           <CardContent>
             <Table>
